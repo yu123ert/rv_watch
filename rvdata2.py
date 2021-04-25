@@ -167,6 +167,8 @@ if __name__ == '__main__':
         # lagulstd=ulpricelag.rolling(window=winnum,center=False).std()*sqrt(250)/b
         plt.figure(figsize=(10, 6))
 
+        
+
         plt.plot(dateSA, rvSpd, 'y-.', label="$Rv5min$")  # 五分钟数据计算所得
         plt.plot(dateSA, mdpd, 'r', label="$rv5min_{ma}$")  # 上述值均值
         plt.plot(dateSA, rvdaily, 'c-.', label="$Rv_{C2C_{20}}$")  # 收盘价数据计算所得

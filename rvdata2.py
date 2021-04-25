@@ -13,19 +13,18 @@ update:20201006 重新跑一下
 
 计算高频已实现波动率
 """
-import pandas as pd
-import numpy as np
 import datetime
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import traceback
 # import tushare as ts
 from WindPy import *
-
-import traceback
-
-import matplotlib.pyplot as plt
-
 # 也不知道干嘛的，反正错误提示要用这个
 from pandas.plotting import register_matplotlib_converters
+
 register_matplotlib_converters()
+
 
 # import time
 
@@ -108,7 +107,7 @@ if __name__ == '__main__':
     dateSeries = w.tdays(sdate, edate, "Period=D")
 
     # uldata = w.wsd(ulticker, "close", sdate, edate, "Period=D")
-    uldata = w.wsd(ulticker, "close", sdate, edate, "Period=D;PriceAdj=F") # 前复权
+    uldata = w.wsd(ulticker, "close", sdate, edate, "Period=D;PriceAdj=F")  # 前复权
 
     ulprice = pd.DataFrame(uldata.Data, index=uldata.Fields, columns=uldata.Times)
     ulprice = ulprice.T  # 将矩阵转置
@@ -145,8 +144,8 @@ if __name__ == '__main__':
         # getrealizedVol_20day(ulprice['CLOSE'])
         rvulstd_20 = []
         for i in range(len(dateSeries.Times)):
-            if i<len(dateSeries.Times)-20:
-                cp_inday = ulprice['CLOSE'][i:i+20]
+            if i < len(dateSeries.Times) - 20:
+                cp_inday = ulprice['CLOSE'][i:i + 20]
                 # rv_inday_20 = getrealizedVol_20day(cp_inday['CLOSE'])
                 rv_inday_20 = getrealizedVol_20day(cp_inday)
                 rvulstd_20.append(rv_inday_20)
@@ -156,27 +155,26 @@ if __name__ == '__main__':
         rvdaily = pd.Series(t)
 
         rvulstd_1day = [np.nan]
-        volcorf=16 #日涨跌数据和波动率转化系数
+        volcorf = 16  # 日涨跌数据和波动率转化系数
 
-        for i in range(1,len(dateSeries.Times)):
-            rv_inday_1day = np.abs(ulprice.CLOSE[i]/ulprice.CLOSE[i-1]-1)
-            rvulstd_1day.append(rv_inday_1day*volcorf)
-
+        for i in range(1, len(dateSeries.Times)):
+            rv_inday_1day = np.abs(ulprice.CLOSE[i] / ulprice.CLOSE[i - 1] - 1)
+            rvulstd_1day.append(rv_inday_1day * volcorf)
 
         # 日数据的标准差
         b = 0.9619  # 20标准差的估计误差
         # preulstd=ulprice.rolling(window=winnum,center=False).std()*sqrt(250)/b
         # lagulstd=ulpricelag.rolling(window=winnum,center=False).std()*sqrt(250)/b
         plt.figure(figsize=(10, 6))
-        
-        plt.plot(dateSA, rvSpd, 'y-.', label="$Rv5min$") # 五分钟数据计算所得
-        plt.plot(dateSA, mdpd, 'r', label="$rv5min_{ma}$") # 上述值均值
-        plt.plot(dateSA, rvdaily, 'c-.', label="$Rv_{C2C_{20}}$") # 收盘价数据计算所得
+
+        plt.plot(dateSA, rvSpd, 'y-.', label="$Rv5min$")  # 五分钟数据计算所得
+        plt.plot(dateSA, mdpd, 'r', label="$rv5min_{ma}$")  # 上述值均值
+        plt.plot(dateSA, rvdaily, 'c-.', label="$Rv_{C2C_{20}}$")  # 收盘价数据计算所得
 
         # 剔除异常数据
         se = pd.Series(rvulstd_1day)
         se[se > 0.8] = 0.8
-        rvulstd_1day=se.tolist()
+        rvulstd_1day = se.tolist()
 
         # 20210409 加这图太脏了，不加了
         # plt.plot(dateSA, rvulstd_1day, 'k.', label="$RvInterDay$") # 日涨跌幅数据计算所得
@@ -186,7 +184,7 @@ if __name__ == '__main__':
         plt.legend()
 
         # plt.show()  # 是一定要这个
-        plt.savefig('rv_wach_'+str(ulticker)+'_'+edate+'.png')
+        plt.savefig('rv_wach_' + str(ulticker) + '_' + edate + '.png')
         # sns.tsplot(rvS, time=dateSA)
         # plt.show() #是一定要这个
         print('end of strategy')
